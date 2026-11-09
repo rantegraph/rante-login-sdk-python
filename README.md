@@ -7,7 +7,7 @@
 - validates the ID token before you trust who signed in;
 - calls the userinfo endpoint.
 
-It finishes sign-ins started by the [Rante Login browser SDK](https://github.com/rante-corporation/rante-login-sdk)
+It finishes sign-ins started by the [Rante Login browser SDK](https://github.com/rantegraph/rante-login-sdk)
 too, including FedCM sign-ins in Chrome and Edge.
 
 The SDK is a thin layer over two libraries: [PyJWT](https://pyjwt.readthedocs.io/) (with `cryptography`) does every
@@ -19,7 +19,7 @@ needs Python 3.10 or later.
 The package isn't on PyPI. Install it from GitHub:
 
 ```sh
-pip install "rante-login-sdk @ git+https://github.com/rante-corporation/rante-login-sdk-python"
+pip install "rante-login-sdk @ git+https://github.com/rantegraph/rante-login-sdk-python"
 ```
 
 ## Register your app

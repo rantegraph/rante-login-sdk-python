@@ -20,7 +20,7 @@ dependencies = [
 test = ["pytest>=8"]
 
 [project.urls]
-Homepage = "https://github.com/rante-corporation/rante-login-sdk-python"
+Homepage = "https://github.com/rantegraph/rante-login-sdk-python"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/rante_login"]
