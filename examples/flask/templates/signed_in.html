@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block title %}Signed in{% endblock %}
+{% block body %}
+    <h1>Signed in{% if user.claims.name %} as {{ user.claims.name }}{% endif %}</h1>
+    <p>This server validated the ID token below. Use <code>sub</code> as the person's ID on this website: it is
+       pairwise, so other organizations' apps see a different value.</p>
+    <p>Signed in with: <strong>{{ user.method }}</strong>, {{ user.signed_in_at }}</p>
+    <table>
+      <tbody>
+      {% for name, value in rows.items() %}
+        <tr><th><code>{{ name }}</code></th><td>{{ value }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <p><a href="/userinfo">Show userinfo</a></p>
+    <form method="post" action="/auth/sign-out"><button type="submit">Sign out</button></form>
+{% endblock %}

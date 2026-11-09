@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block title %}Userinfo{% endblock %}
+{% block body %}
+    <h1>Userinfo</h1>
+    <p>From GET https://login.rante.com/common/oidc/v2.0/userinfo:</p>
+    <table>
+      <tbody>
+      {% for name, value in rows.items() %}
+        <tr><th><code>{{ name }}</code></th><td>{{ value }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <p><a href="/">Back</a></p>
+{% endblock %}

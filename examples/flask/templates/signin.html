@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block title %}Sign in with Rante{% endblock %}
+{% block body %}
+    <h1>Sign in with Rante</h1>
+    <p>Flask example of the Rante Login SDK for Python: the server finishes the sign-in and validates the ID token.</p>
+    <div id="rante-signin"
+         data-client-id="{{ client_id }}"
+         data-redirect-uri="{{ redirect_uri }}"
+         data-scope="{{ scope }}"
+         data-nonce="{{ nonce }}"></div>
+    <p id="rante-signin-status" role="status"></p>
+    <p><a href="/auth/rante/sign-in">Sign in without JavaScript</a> (the server starts the sign-in)</p>
+    <script src="{{ sdk_src }}" integrity="{{ sdk_integrity }}" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='signin.js') }}"></script>
+{% endblock %}

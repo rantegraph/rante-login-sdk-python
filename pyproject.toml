@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rante-login-sdk"
+version = "1.0.0"
+description = "\"Sign in with Rante\" for Python servers: authorize URL with PKCE, code exchange with private_key_jwt, ID token validation and userinfo, on PyJWT."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [{ name = "Rante Corporation" }]
+dependencies = [
+    "PyJWT[crypto]>=2.15",
+    "requests>=2.32",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.urls]
+Homepage = "https://github.com/rante-corporation/rante-login-sdk-python"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rante_login"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
