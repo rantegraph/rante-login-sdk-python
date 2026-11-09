@@ -18,6 +18,8 @@ import logging
 import os
 import secrets
 import sys
+import threading
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -28,6 +30,27 @@ from rante_login import BROWSER_SDK_COOKIES, RanteLoginClient, RanteLoginError, 
 
 SDK_SRC = "https://login.rante.com/sdk/v1/rante-login.js"
 SDK_INTEGRITY = "sha384-2W12/NktCjRqFuXWiUtHr1yEtdrjBlCRWnJ+//FZMiqd1KRX/K+YMWLoMgF9R7wf"
+
+# This website's own accounts. A person's first "Sign in with Rante" here is their sign-up: the account is created from
+# the claims they agreed to share, and every later sign-in finds it by `sub`. A real website keeps accounts in its
+# database; this example keeps them in memory, so they're gone when the server restarts.
+accounts: dict[str, dict] = {}
+accounts_lock = threading.Lock()
+
+
+def register_or_find(claims: dict) -> tuple[dict, bool]:
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    with accounts_lock:
+        account = accounts.get(claims["sub"])
+        created = account is None
+        if created:
+            account = {"id": str(uuid.uuid4()), "sub": claims["sub"], "name": None, "email": None, "created_at": now}
+            accounts[claims["sub"]] = account
+        # Keep the details the person shares this time. Rante shares an email only once it's verified.
+        account["name"] = claims.get("name") or account["name"]
+        account["email"] = claims.get("email") or account["email"]
+        account["last_sign_in_at"] = now
+        return dict(account), created
 
 key_prefix = os.environ.get("RANTE_LOGIN_KEY_PREFIX", "").strip()
 key_file = os.environ.get("RANTE_LOGIN_PRIVATE_KEY_FILE", "").strip()
@@ -81,7 +104,10 @@ def security_headers(response):
 @app.get("/")
 def index():
     if "user" in session:
-        page = render_template("signed_in.html", user=session["user"], rows=rows_of(session["user"]["claims"]))
+        with accounts_lock:
+            account = dict(accounts[session["user"]["claims"]["sub"]]) if session["user"]["claims"]["sub"] in accounts else None
+        page = render_template("signed_in.html", user=session["user"], rows=rows_of(session["user"]["claims"]),
+                               account=account)
     else:
         # FedCM hands the ID token to the page, so its nonce must be one the page can't choose: issue it here and keep
         # it in the session. The browser SDK sends the same nonce in its redirect flow.
@@ -179,10 +205,13 @@ def sign_out():
 
 
 def start_session(user: dict) -> None:
-    """A fresh session for the person who signed in: the old values, and the used nonce, are dropped."""
+    """A fresh session for the person who signed in: the old values, and the used nonce, are dropped. The sign-in also
+    creates or finds their account on this website."""
+    _, created = register_or_find(user["claims"])
     session.clear()
     session.permanent = True
-    session["user"] = {**user, "signed_in_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+    session["user"] = {**user, "new_account": created,
+                       "signed_in_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
 
 
 def rows_of(claims: dict) -> dict[str, str]:
